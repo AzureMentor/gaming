@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using HoloToolkit.Unity;
-using System.Collections.Generic;
 
 
-public class UnpackReceivedJson : Singleton<UnpackReceivedJson> {
+public class UnpackReceivedJson : Singleton<UnpackReceivedJson>
+{
 
     public SpawnIceLiceForSwarm SpawnIceLiceScript;
     public Transform FormationPrefab;
@@ -11,185 +11,126 @@ public class UnpackReceivedJson : Singleton<UnpackReceivedJson> {
     public ArachnotankManager TankManagerScript;
 
 
+    public void UnpackJsonString(string receivedString)
+    {
+        JsonForAzure receivedMessage = JsonUtility.FromJson<JsonForAzure>(receivedString);
 
-        private void ResolvePlayerAction(JsonForAzure json)
+        switch (receivedMessage.type)
         {
-            if (json.spec != Constants.MSG_PLAYER_CURRENT)
-            {
-                // log undefined spec message
-                return;
-            }
+            // player
+            case 0:
+                // current player receives score from Azure
+                if (receivedMessage.spec == 0 && receivedMessage.action == 2)
+                {
+                    ScoreSingleton.Instance.SetPlayerScore(receivedMessage.payload.playerScore);
+                }
+                break;
+            // enemy
+            case 1:
+                DoEnemyAction(receivedMessage);
+                break;
 
-            switch (json.action)
-            {
-                case Constants.MSG_ACTION_GET_SCORE:
-                    ScoreSingleton.Instance.SetPlayerScore(json.payload.playerScore);
-                    break;
-                default:
-                    // log unhandled action message
-                    break;
-            }
-        }
-
-        private void ResolveNpcAction(JsonForAzure json)
-        {
-            switch (json.spec)
-            {
-                case Constants.MSG_NPC_ICE_LICE:
-                    ActionForIceLice(json);
-                    break;
-                case Constants.MSG_NPC_ARAC_TANK:
-                    ActionForArachnoTank(json);
-                    break;
-                case Constants.MSG_NPC_FIRE_FLY:
-                    ActionForFireFly(json);
-                    break;
-                case Constants.MSG_NPC_FORMATION:
-                    ActionForFormation(json);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void ResolveInitAction(JsonForAzure json)
-        {
-            switch (json.action)
-            {
-                case Constants.MSG_ACTION_INIT:
-                    {
-                        WebSocketClientSingleton.Instance.SetInstanceId(json.payload.instance);
-                    }
-                    break;
-                default:
-                    //log error 
-                    break;
-            }
-        }
-
-        private void ActionForArachnoTank(JsonForAzure json)
-        {
-            switch (json.action)
-            {
-                case Constants.MSG_ACTION_BARRAGE:
-                    TankManagerScript.BeginBarrage();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void ActionForFireFly(JsonForAzure json)
-        {
-            switch (json.action)
-            {
-                case Constants.MSG_ACTION_STRIKE:
-                    FireflyManagerScript.BeginAirstrike();
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void ActionForIceLice(JsonForAzure json)
-        {
-            switch (json.action)
-            {
-                case Constants.MSG_ACTION_TOXIC:
-                    var newToxicIceLice = DictionaryOfIds.Instance.GetGameObject(json.payload.npcId);
-                    newToxicIceLice.SendMessage(Constants.METHOD_MAKE_TOXIC, SendMessageOptions.DontRequireReceiver);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void InitFormation(Vector3 position, string id, List<string> members)
-        {
-            var formation = Instantiate(FormationPrefab, position, Quaternion.identity).gameObject;
-            formation.SendMessage(Constants.METHOD_FORMATION_INIT, id, SendMessageOptions.DontRequireReceiver);
-            if (members.Count == 0)
-            {
-                return;
-            }
-            formation.SendMessage(Constants.METHOD_FORMATION_ASSIGN, members, SendMessageOptions.DontRequireReceiver);
-        }
-
-        private void MoveFormation(Vector3 position, string id, List<Vector3> waypoints)
-        {
-            var formation = DictionaryOfIds.Instance.GetGameObject(id);
-            if (formation == null)
-            {
-                return;
-            }
-
-            formation.SendMessage(Constants.METHOD_FORMATION_POSITION, position, SendMessageOptions.DontRequireReceiver);
-            if (waypoints.Count == 0)
-            {
-                return;
-            }
-            formation.SendMessage(Constants.METHOD_FORMATION_OFFSETS, waypoints, SendMessageOptions.DontRequireReceiver);
-        }
-
-        private void ActionForFormation(JsonForAzure json)
-        {
-            switch (json.action)
-            {
-                case Constants.MSG_ACTION_SPAWN:
-                    InitFormation(json.payload.waypoint, json.payload.formationId, new List<string>());
-                    SpawnIceLiceScript.SpawnEnemiesForFormation(json.payload.formationId, json.payload.listOfMembers);
-                    break;
-                case Constants.MSG_FORMATION_SPLIT:
-                    Vector3 primaryFormationPosition = DictionaryOfIds.Instance.GetGameObject(json.payload.formationId).transform.position;
-                    DictionaryOfIds.Instance.RemoveFormation(json.payload.formationId);
-
-                    InitFormation(primaryFormationPosition, json.payload.formationId, json.payload.listOfMembers);
-                    InitFormation(json.payload.waypoint, json.payload.secondaryFormationId, json.payload.secondaryListOfMembers);
-                    break;
-                case Constants.MSG_FORMATION_MERGE:
-                    Vector3 mergedPosition = DictionaryOfIds.Instance.GetGameObject(json.payload.formationId).transform.position;
-                    DictionaryOfIds.Instance.RemoveFormation(json.payload.formationId);
-                    DictionaryOfIds.Instance.RemoveFormation(json.payload.secondaryFormationId);
-
-                    InitFormation(mergedPosition, json.payload.formationId, json.payload.listOfMembers);
-                    break;
-                case Constants.MSG_FORMATION_REFORM:
-                    MoveFormation(json.payload.waypoint, json.payload.formationId, json.payload.listOfWaypoints);
-                    break;
-                case Constants.MSG_FORMATION_MOVE:
-                    MoveFormation(json.payload.waypoint, json.payload.formationId, new List<Vector3>());
-                    break;
-                case Constants.MSG_FORMATION_SCATTER:
-                    foreach (string id in json.payload.listOfMembers)
-                    {
-                        GameObject formationForScatter = DictionaryOfIds.Instance.GetGameObject(id);
-                        formationForScatter.SendMessage(Constants.METHOD_SCATTER, SendMessageOptions.DontRequireReceiver);
-                    }
-                    break;
-                default:
-                    //log error unhandled action
-                    break;
-            }
-        }
-
-        public void UnpackJsonString(string receivedString)
-        {
-            JsonForAzure receivedJson = JsonUtility.FromJson<JsonForAzure>(receivedString);
-
-            switch (receivedJson.type)
-            {
-                case Constants.MSG_TYPE_PLAYER:
-                    ResolvePlayerAction(receivedJson);
-                    break;
-                case Constants.MSG_TYPE_ENEMY:
-                    ResolveNpcAction(receivedJson);
-                    break;
-                case Constants.MSG_TYPE_INIT:
-                    ResolveInitAction(receivedJson);
-                    break;
-                default:
-                    //log error unhandled msg type
-                    break;
-            }
+            // init
+            case 4:
+                if (receivedMessage.action == 0)
+                {
+                    WebSocketClientSingleton.Instance.SetInstanceId(receivedMessage.payload.instance);
+                }
+                break;
         }
     }
+
+    private void DoEnemyAction(JsonForAzure receivedMessage)
+    {
+        switch (receivedMessage.spec)
+        {
+            // Ice Lice
+            case 1:
+                // transform into toxic
+                if (receivedMessage.action == 9)
+                {
+                    DictionaryOfIds.Instance.GetGameObject(receivedMessage.payload.npcId).SendMessage(Constants.METHOD_MAKE_TOXIC, SendMessageOptions.DontRequireReceiver);
+                }
+                break;
+
+            // Arachnotank
+            case 2:
+                // Barrage
+                if (receivedMessage.action == 4)
+                {
+                    TankManagerScript.BeginBarrage();
+                }
+                break;
+
+            // FireFly
+            case 3:
+                //Airstrike
+                if (receivedMessage.action == 4)
+                {
+                    FireflyManagerScript.BeginAirstrike();
+                }
+                break;
+
+            // Formation
+            case 4:
+                DoFormationAction(receivedMessage);
+                break;
+        }
+    }
+
+    private void DoFormationAction(JsonForAzure receivedMessage)
+    {
+        switch (receivedMessage.action)
+        {
+            // spawn
+            case 0:
+                Vector3 spawnPosition = receivedMessage.payload.waypoint;
+                GameObject newFormation = Instantiate(FormationPrefab, spawnPosition, Quaternion.identity).gameObject;
+                newFormation.SendMessage(Constants.METHOD_FORMATION_INIT, receivedMessage.payload.formationId, SendMessageOptions.DontRequireReceiver);
+                SpawnIceLiceScript.SpawnEnemiesForFormation(receivedMessage.payload.formationId, receivedMessage.payload.listOfMembers);
+                break;
+
+            // split
+            case 4:
+                Vector3 primaryFormationPosition = DictionaryOfIds.Instance.GetGameObject(receivedMessage.payload.formationId).transform.position;
+                DictionaryOfIds.Instance.RemoveFormation(receivedMessage.payload.formationId);
+
+                GameObject recreatedPrimaryFormation = Instantiate(FormationPrefab, primaryFormationPosition, Quaternion.identity).gameObject;
+                recreatedPrimaryFormation.SendMessage(Constants.METHOD_FORMATION_INIT, receivedMessage.payload.formationId, SendMessageOptions.DontRequireReceiver);
+                recreatedPrimaryFormation.SendMessage(Constants.METHOD_FORMATION_ASSIGN, receivedMessage.payload.listOfMembers, SendMessageOptions.DontRequireReceiver);
+                GameObject secondaryFormation = Instantiate(FormationPrefab, receivedMessage.payload.waypoint, Quaternion.identity).gameObject;
+                secondaryFormation.SendMessage(Constants.METHOD_FORMATION_INIT, receivedMessage.payload.secondaryFormationId, SendMessageOptions.DontRequireReceiver);
+                secondaryFormation.SendMessage(Constants.METHOD_FORMATION_ASSIGN, receivedMessage.payload.secondaryListOfMembers, SendMessageOptions.DontRequireReceiver);
+                break;
+
+            // merge
+            case 5:
+                Vector3 mergedPosition = DictionaryOfIds.Instance.GetGameObject(receivedMessage.payload.formationId).transform.position;
+                DictionaryOfIds.Instance.RemoveFormation(receivedMessage.payload.formationId);
+                DictionaryOfIds.Instance.RemoveFormation(receivedMessage.payload.secondaryFormationId);
+
+                GameObject mergedFormation = Instantiate(FormationPrefab, mergedPosition, Quaternion.identity).gameObject;
+                mergedFormation.SendMessage(Constants.METHOD_FORMATION_INIT, receivedMessage.payload.formationId, SendMessageOptions.DontRequireReceiver);
+                mergedFormation.SendMessage(Constants.METHOD_FORMATION_ASSIGN, receivedMessage.payload.listOfMembers, SendMessageOptions.DontRequireReceiver);
+                break;
+
+            // new waypoints for formation (but not for members)
+            case 7:
+                GameObject formation = DictionaryOfIds.Instance.GetGameObject(receivedMessage.payload.formationId);
+                if (formation != null)
+                {
+                    formation.SendMessage(Constants.METHOD_FORMATION_POSITION, receivedMessage.payload.waypoint, SendMessageOptions.DontRequireReceiver);
+                }
+                break;
+
+            // scatter
+            case 8:
+                receivedMessage.payload.listOfMembers.ForEach(id =>
+                {
+                    GameObject formationForScatter = DictionaryOfIds.Instance.GetGameObject(id);
+                    formationForScatter.SendMessage(Constants.METHOD_SCATTER, SendMessageOptions.DontRequireReceiver);
+                });
+                break;
+        }
+    }
+}

@@ -6,16 +6,15 @@ using HoloToolkit.Unity;
 
 public class WebSocketClientSingleton : Singleton<WebSocketClientSingleton>
 {
-    private const string address = "wss://137.117.8.144/ws"; // test
-    //private const string address = "wss://104.42.109.130/ws"; // prod 1
+     private const string address = "wss://<INTERNAL_RELAY_IP>:8085/ws"; // Deployment Guide
     private WebSocket webSocket;
     private int type;
     private int spec;
     private int action;
     private string instance;
-    private string auth = "0f14968d-e098-4252-b335-ba8b0279fae5";      // test
-    //private string auth = "b99f8f15-20fc-4a82-9f0a-fed43a4f6d02"; // prod 1
+    private string auth = "<INTERNAL_RELAY_AUTH_TOKEN>";      // Deployment Guide
     private string payloadPlayerName = "Player Name";
+
 
     private void Update()
     {

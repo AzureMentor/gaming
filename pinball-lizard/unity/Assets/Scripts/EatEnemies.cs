@@ -33,7 +33,7 @@ public class EatEnemies : Singleton<EatEnemies>
 
     public void EatEnemyIfClose()
     {
-        foreach (GameObject heldEnemy in _listOfHeldEnemies)
+        foreach (GameObject heldEnemy in _listOfHeldEnemies.ToArray())
         {
             float distance = Vector3.Distance(transform.position, heldEnemy.transform.position);
 

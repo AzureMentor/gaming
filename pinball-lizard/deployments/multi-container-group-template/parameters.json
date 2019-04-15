@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "groupSuffix": {
+            "value": "prod"
+        },
+        "commanderURI": {
+            "value": "Set-in-parameter-file"
+        },
+        "commanderPort": {
+            "value": "9221"
+        },
+        "internalRelayURI": {
+            "value": "Set-in-parameter-file"
+        },
+        "relayPort": {
+            "value": "9125"
+        },
+        "routerURI": {
+            "value": "Set-in-parameter-file"
+        },
+        "routerWebsocketPort": {
+            "value": "8085"
+        },
+        "routerBackdoorPort": {
+            "value": "9010"
+        },
+        "mixerURI": {
+            "value": "Set-in-parameter-file"
+        },
+        "mixerPort": {
+            "value": "9110"
+        },
+        "playfabURI": {
+            "value": "Set-in-parameter-file"
+        },
+        "playfabPort": {
+            "value": "9111"
+        },
+        "imageRegistryLoginServer": {
+            "value": "Set-in-parameter-file"
+        },
+        "imageUsername": {
+            "value": "Set-in-parameter-file"
+        },
+        "imagePassword": {
+            "value": "Set-in-parameter-file"
+        },
+        "osType": {
+            "value": "Linux"
+        },
+        "numberCoresContainer": {
+            "value": "1"
+        },
+        "memoryContainer": {
+            "value": "2"
+        },
+        "numberCoresContainerLight": {
+            "value": ".5"
+        }
+    }
+}

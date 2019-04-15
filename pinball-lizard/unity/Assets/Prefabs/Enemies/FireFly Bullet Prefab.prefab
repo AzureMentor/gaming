@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4074489726246648}
   - component: {fileID: 82981668476828844}
-  - component: {fileID: 114789494505012974}
   - component: {fileID: 114904914801494228}
   - component: {fileID: 96447661337288690}
   - component: {fileID: 114359598561341688}
@@ -301,24 +300,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TimeUntilDelete: 5
---- !u!114 &114789494505012974
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1534115388021830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef5a094dc87bdd54293dafdb244e1928, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _listAudioclips:
-  - {fileID: 8300000, guid: bf177fb7a9267ea499d99b2368796187, type: 3}
-  - {fileID: 8300000, guid: 85d73dc6b68e4e1409b03902f1d5dc0e, type: 3}
-  - {fileID: 8300000, guid: 675639fd817db6a4fb02fdef86401780, type: 3}
-  - {fileID: 8300000, guid: 98d033fbdb5b95c4f99fe02d5b8816c8, type: 3}
-  - {fileID: 8300000, guid: 892e76c073d4a104faf926fff9f6f2b6, type: 3}
-  - {fileID: 8300000, guid: 6302cd33f60d2c048a996ce9109de3bb, type: 3}
 --- !u!114 &114904914801494228
 MonoBehaviour:
   m_ObjectHideFlags: 1

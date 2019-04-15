@@ -1,0 +1,205 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "groupSuffix": {
+            "type": "string"
+        },
+        "commanderURI": {
+            "type": "string"
+        },
+        "commanderPort": {
+            "type": "string"
+        },
+        "internalRelayURI": {
+            "type": "string"
+        },
+        "relayPort": {
+            "type": "string"
+        },
+        "routerURI": {
+            "type": "string"
+        },
+        "routerWebsocketPort": {
+            "type": "string"
+        },
+        "routerBackdoorPort": {
+            "type": "string"
+        },
+        "mixerURI": {
+            "type": "string"
+        },
+        "mixerPort": {
+            "type": "string"
+        },
+        "playfabURI": {
+            "type": "string"
+        },
+        "playfabPort": {
+            "type": "string"
+        },
+        "imageRegistryLoginServer": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "imageUsername": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "imagePassword": {
+            "defaultValue": "",
+            "type": "securestring"
+        },
+        "osType": {
+            "allowedValues": [
+                "Linux"
+            ],
+            "type": "string"
+        },
+        "numberCoresContainer": {
+            "type": "string"
+        },
+        "memoryContainer": {
+            "type": "string"
+        },
+        "numberCoresContainerLight": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "groupName": "[concat('pinball-lizard-cg-',parameters('groupSuffix'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "name": "[variables('groupName')]",
+            "apiVersion": "2018-04-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "pbl-commander",
+                        "properties": {
+                            "image": "[parameters('commanderURI')]",
+                            "ports": [
+                                {
+                                    "port": "[parameters('commanderPort')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('numberCoresContainer')]",
+                                    "memoryInGB": "[parameters('memoryContainer')]"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "pbl-relay",
+                        "properties": {
+                            "image": "[parameters('internalRelayURI')]",
+                            "ports": [
+                                {
+                                    "port": "[parameters('relayPort')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('numberCoresContainer')]",
+                                    "memoryInGB": "[parameters('memoryContainer')]"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "pbl-router",
+                        "properties": {
+                            "image": "[parameters('routerURI')]",
+                            "ports": [
+                                {
+                                    "port": 80
+                                },
+                                {
+                                    "port": "[parameters('routerBackdoorPort')]"
+                                },
+                                {
+                                    "port": "[parameters('routerWebsocketPort')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('numberCoresContainer')]",
+                                    "memoryInGB": "[parameters('memoryContainer')]"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "pbl-mixer",
+                        "properties": {
+                            "image": "[parameters('mixerURI')]",
+                            "ports": [
+                                {
+                                    "port": "[parameters('mixerPort')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('numberCoresContainerLight')]",
+                                    "memoryInGB": "[parameters('memoryContainer')]"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "pbl-playfab",
+                        "properties": {
+                            "image": "[parameters('playfabURI')]",
+                            "ports": [
+                                {
+                                    "port": "[parameters('playfabPort')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "[parameters('numberCoresContainerLight')]",
+                                    "memoryInGB": "[parameters('memoryContainer')]"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "osType": "[parameters('osType')]",
+                "ipAddress": {
+                    "type": "Public",
+                    "ports": [
+                        {
+                            "protocol": "TCP",
+                            "port": 80
+                        },
+                        {
+                            "protocol": "TCP",
+                            "port": "[parameters('routerBackdoorPort')]"
+                        },
+                        {
+                            "protocol": "TCP",
+                            "port": "[parameters('routerWebsocketPort')]"
+                        },
+                        {
+                            "protocol": "TCP",
+                            "port": "[parameters('relayPort')]"
+                        }
+                    ]
+                },
+                "imageRegistryCredentials": [
+                    {
+                        "server": "[parameters('imageRegistryLoginServer')]",
+                        "username": "[parameters('imageUsername')]",
+                        "password": "[parameters('imagePassword')]"
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}

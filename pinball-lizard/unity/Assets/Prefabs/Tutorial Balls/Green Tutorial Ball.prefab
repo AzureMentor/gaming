@@ -77,7 +77,6 @@ GameObject:
   - component: {fileID: 114671057952501038}
   - component: {fileID: 114375585991281960}
   - component: {fileID: 114684257799416230}
-  - component: {fileID: 114616946227463098}
   - component: {fileID: 114765447907981106}
   m_Layer: 0
   m_Name: Green Tutorial Ball
@@ -818,18 +817,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &114616946227463098
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1139397564067604}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10d96c68857a14247b177696140132ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rotationRate: 0.1
 --- !u!114 &114671057952501038
 MonoBehaviour:
   m_ObjectHideFlags: 1

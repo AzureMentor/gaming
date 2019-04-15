@@ -26,7 +26,6 @@ GameObject:
   - component: {fileID: 114465963614012250}
   - component: {fileID: 114142396341774232}
   - component: {fileID: 114644605080601338}
-  - component: {fileID: 114144266646914706}
   - component: {fileID: 114563602105598392}
   m_Layer: 0
   m_Name: Blue Tutorial Ball
@@ -663,18 +662,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &114144266646914706
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1047936108437100}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10d96c68857a14247b177696140132ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rotationRate: 0.1
 --- !u!114 &114465963614012250
 MonoBehaviour:
   m_ObjectHideFlags: 1
